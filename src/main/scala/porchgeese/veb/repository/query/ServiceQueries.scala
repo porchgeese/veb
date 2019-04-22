@@ -28,6 +28,6 @@ object ServiceQueries {
         |   ${service.created},
         |   ${service.updated},
         |  )
-      """.update.run
+      """.stripMargin.update.run
 
 }

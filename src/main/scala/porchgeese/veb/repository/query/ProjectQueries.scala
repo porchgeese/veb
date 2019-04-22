@@ -13,6 +13,6 @@ object ProjectQueries {
         | ${project.name},
         | ${project.created},
         | ${project.updated})
-      """.update.run
+      """.stripMargin.update.run
 
 }
