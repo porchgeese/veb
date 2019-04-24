@@ -6,12 +6,12 @@ import cats.effect.IO
 import porchgeese.veb.model.{Project, ProjectId, ProjectName}
 import porchgeese.veb.repository.ProjectRepository
 
-trait ProjectService {
+trait ProjectsService {
   def create(name: ProjectName): IO[Project]
 }
 
-object ProjectService {
-  def apply(projectRepo: ProjectRepository, uuidService: UUIDService, clock: Clock): ProjectService = new ProjectService {
+object ProjectsService {
+  def apply(projectRepo: ProjectRepository, uuidService: UUIDService, clock: Clock): ProjectsService = new ProjectsService {
     override def create(name: ProjectName): IO[Project] =
       for {
         id     <- uuidService.generate.map(ProjectId(_))

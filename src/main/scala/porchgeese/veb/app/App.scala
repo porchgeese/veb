@@ -14,7 +14,7 @@ import porchgeese.veb.health.HealthCheckService
 import porchgeese.veb.routes.{AppStatusRoutes, ProjectRoutes}
 import org.http4s.server.Router
 import porchgeese.veb.repository.ProjectRepository
-import porchgeese.veb.service.{ProjectService, UUIDService}
+import porchgeese.veb.service.{ProjectsService, ServicesService, UUIDService}
 
 trait App {
   def ec: ExecutionContext
@@ -49,10 +49,14 @@ object App {
     val uuidService       = UUIDService()
     val clock             = Clock.systemUTC()
     val projectRepository = ProjectRepository(_db)
-    val projectService    = ProjectService(projectRepository, uuidService, clock)
+    val projectService    = ProjectsService(projectRepository, uuidService, clock)
+    val serviceService    = ServicesService(projectRepository, uuidService, clock)
+
+    val projectRoutes   = new ProjectRoutes(projectService, serviceService)
+    val appStatusRoutes = new AppStatusRoutes(healthService)
     val appRoutes = Router(
-      "/_meta"   -> new AppStatusRoutes(healthService).routes,
-      "/project" -> new ProjectRoutes(projectService).routes
+      "/_meta"   -> appStatusRoutes.routes,
+      "/project" -> projectRoutes.routes
     )
 
     new App {

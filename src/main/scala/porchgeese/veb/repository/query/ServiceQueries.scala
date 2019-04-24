@@ -12,10 +12,11 @@ object ServiceQueries {
     sql"""
         |INSERT INTO services (
         | id,
-        | project,
+        | project_id,
         | coordinate_x,
         | coordinate_y,
-        | name, kind,
+        | name,
+        | kind,
         | created,
         | updated
         | ) VALUES(
@@ -26,7 +27,7 @@ object ServiceQueries {
         |   ${service.name},
         |   ${service.kind},
         |   ${service.created},
-        |   ${service.updated},
+        |   ${service.updated}
         |  )
       """.stripMargin.update.run
 
