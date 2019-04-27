@@ -12,6 +12,8 @@ import io.circe.Decoder._
 
 package object model {
   type Coordinate = Double
+  type Width      = Double
+  type Length     = Double
   type Identifier = UUID
 
   case class ServiceType(value: String) extends AnyVal
@@ -52,7 +54,20 @@ package object model {
     implicit val encoder: Encoder[Position] = deriveEncoder[Position]
   }
 
-  case class Service(project: ProjectId, position: Position, name: String, kind: ServiceType, id: ServiceId, created: Instant, updated: Instant)
+  case class Dimension(width: Width, length: Length)
+  object Dimension {
+    implicit val decoder: Decoder[Dimension] = deriveDecoder[Dimension]
+    implicit val encoder: Encoder[Dimension] = deriveEncoder[Dimension]
+  }
+
+  case class Service(id: ServiceId,
+                     project: ProjectId,
+                     position: Position,
+                     dimension: Dimension,
+                     name: String,
+                     kind: ServiceType,
+                     created: Instant,
+                     updated: Instant)
   object Service {
     implicit val decoder: Decoder[Service] = deriveDecoder[Service]
     implicit val encoder: Encoder[Service] = deriveEncoder[Service]
@@ -62,6 +77,15 @@ package object model {
   object Project {
     implicit val decoder: Decoder[Project] = deriveDecoder[Project]
     implicit val encoder: Encoder[Project] = deriveEncoder[Project]
+  }
+
+  case class ProjectWithServices(id: ProjectId, name: ProjectName, services: List[Service], created: Instant, updated: Instant)
+
+  object ProjectWithServices {
+    implicit val decoder: Decoder[ProjectWithServices] = deriveDecoder[ProjectWithServices]
+    implicit val encoder: Encoder[ProjectWithServices] = deriveEncoder[ProjectWithServices]
+    def from(project: Project, services: List[Service]): ProjectWithServices =
+      ProjectWithServices(project.id, project.name, services, project.created, project.updated)
   }
 
 }

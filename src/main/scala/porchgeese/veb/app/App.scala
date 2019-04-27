@@ -15,7 +15,7 @@ import porchgeese.veb.routes.{AppStatusRoutes, ProjectRoutes}
 import org.http4s.server.Router
 import porchgeese.veb.repository.ProjectRepository
 import porchgeese.veb.service.{ProjectsService, ServicesService, UUIDService}
-
+import org.http4s.server.middleware._
 trait App {
   def ec: ExecutionContext
   def cs: ContextShift[IO]
@@ -54,10 +54,10 @@ object App {
 
     val projectRoutes   = new ProjectRoutes(projectService, serviceService)
     val appStatusRoutes = new AppStatusRoutes(healthService)
-    val appRoutes = Router(
+    val appRoutes = CORS(Router(
       "/_meta"   -> appStatusRoutes.routes,
-      "/project" -> projectRoutes.routes
-    )
+      "/projects" -> projectRoutes.routes
+    ))
 
     new App {
       override def ec: ExecutionContext     = _ec
