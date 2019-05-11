@@ -10,8 +10,7 @@ import doobie.implicits._
 import porchgeese.veb.repository.query.{ProjectQueries, ServiceQueries}
 import cats.implicits._
 import cats._
-
-case class ProjectFilter(projectId: Option[UUID])
+import porchgeese.veb.model.Filters.ProjectFilter
 
 trait ProjectRepository {
   def findProject(project: ProjectId): IO[Option[ProjectWithServices]]
@@ -19,6 +18,7 @@ trait ProjectRepository {
   def addService(service: Service): IO[Service]
   def updateService(serviceId: ServiceId)(service: Service): IO[Unit]
   def findService(id: ServiceId): IO[Option[Service]]
+  def findProjects(filter: ProjectFilter): IO[List[ProjectWithServices]]
 }
 
 object ProjectRepository {
@@ -34,6 +34,12 @@ object ProjectRepository {
         project  <- ProjectQueries.findProject(id)
         services <- ServiceQueries.findServicesFor(id)
       } yield project.map(ProjectWithServices.from(_, services))).transact(db)
+
+    override def findProjects(filter: ProjectFilter): IO[List[ProjectWithServices]] =
+      (for {
+        projects <- ProjectQueries.findProjects(filter)
+        services <- projects.traverse(p => ServiceQueries.findServicesFor(p.id)).map(_.flatten)
+      } yield projects.map(p => ProjectWithServices.from(p, services.filter(_.project == p.id)))).transact(db)
 
     override def findService(id: ServiceId): IO[Option[Service]] =
       (for {

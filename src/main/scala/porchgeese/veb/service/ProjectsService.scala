@@ -1,16 +1,17 @@
 package porchgeese.veb.service
 
 import java.time.{Clock, Instant}
-import java.util.UUID
 
 import cats.effect.IO
 import com.typesafe.scalalogging.StrictLogging
+import porchgeese.veb.model.Filters.ProjectFilter
 import porchgeese.veb.model.{Project, ProjectId, ProjectName, ProjectWithServices}
 import porchgeese.veb.repository.ProjectRepository
 
 trait ProjectsService {
   def create(name: ProjectName): IO[Project]
   def find(projectId: ProjectId): IO[Option[ProjectWithServices]]
+  def find(filter: ProjectFilter): IO[List[ProjectWithServices]]
 }
 
 object ProjectsService {
@@ -31,6 +32,13 @@ object ProjectsService {
         _       <- IO(logger.info(s"Querying for project with id $projectId"))
         project <- projectRepo.findProject(projectId)
         _       <- IO(logger.info(s"Found project? : ${project.isDefined}"))
+      } yield project
+
+    override def find(filter: ProjectFilter): IO[List[ProjectWithServices]] =
+      for {
+        _       <- IO(logger.info(s"Querying for project with filter $filter"))
+        project <- projectRepo.findProjects(filter)
+        _       <- IO(logger.info(s"Found projects ? : ${project.size}"))
       } yield project
   }
 }

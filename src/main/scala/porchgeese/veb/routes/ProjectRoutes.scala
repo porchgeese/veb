@@ -12,6 +12,7 @@ import cats._
 import cats.effect._
 import cats.effect.implicits._
 import com.typesafe.scalalogging.StrictLogging
+import porchgeese.veb.model.Filters.ProjectFilter
 class ProjectRoutes(projectService: ProjectsService, serviceService: ServicesService) extends StrictLogging {
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
 
@@ -22,6 +23,13 @@ class ProjectRoutes(projectService: ProjectsService, serviceService: ServicesSer
       } yield {
         result
       }).flatMap(Created(_))
+
+    case _ @GET -> Root =>
+      (for {
+        result <- projectService.find(ProjectFilter.empty)
+      } yield {
+        result
+      }).flatMap(Ok(_))
 
     case _ @GET -> Root / UUIDVar(projectId) =>
       (for {
